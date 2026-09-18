@@ -1,0 +1,117 @@
+name: Build 93 Services - Verified APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build, align, sign and verify installable APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.6.1'
+
+      - name: Build unsigned release APK
+        run: |
+          gradle clean assembleRelease --stacktrace
+          test -s app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Create CI signing key
+        run: |
+          keytool -genkeypair -v \
+            -keystore 93_services_ci.keystore \
+            -storepass ci-build-password \
+            -alias 93servicesrelease \
+            -keypass ci-build-password \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=93 Services, OU=TECHART, O=93 Services, L=Thohoyandou, ST=Limpopo, C=ZA"
+
+      - name: Zip-align APK before signing
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/zipalign -P 16 -f -v 4 \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            app/build/outputs/app-release-aligned.apk
+
+      - name: Sign aligned APK
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/apksigner sign \
+            --ks 93_services_ci.keystore \
+            --ks-pass pass:ci-build-password \
+            --ks-key-alias 93servicesrelease \
+            --key-pass pass:ci-build-password \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --v4-signing-enabled false \
+            --out 93-Services-Installable.apk \
+            app/build/outputs/app-release-aligned.apk
+
+      - name: Verify APK alignment
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/zipalign -c -P 16 -v 4 93-Services-Installable.apk
+
+      - name: Verify APK signature
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/apksigner verify --verbose --print-certs 93-Services-Installable.apk
+
+      - name: Verify APK package metadata
+        run: |
+          $ANDROID_HOME/build-tools/36.0.0/aapt2 dump badging 93-Services-Installable.apk | head -30
+
+      - name: Verify APK is structurally readable
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          apk = "93-Services-Installable.apk"
+          with zipfile.ZipFile(apk) as z:
+              bad = z.testzip()
+              if bad:
+                  raise SystemExit(f"Corrupt ZIP entry: {bad}")
+              names = set(z.namelist())
+              required = {"AndroidManifest.xml", "resources.arsc"}
+              missing = required - names
+              if missing:
+                  raise SystemExit(f"Missing required APK entries: {sorted(missing)}")
+              if any(n.startswith("lib/") for n in names):
+                  print("Native libraries detected.")
+              else:
+                  print("No native libraries: device ABI is not an installation blocker.")
+          print("APK archive integrity: OK")
+          PY
+
+      - name: Final APK report
+        run: |
+          ls -lh 93-Services-Installable.apk
+          sha256sum 93-Services-Installable.apk
+
+      - name: Upload verified installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: 93-services-verified-installable-apk
+          path: 93-Services-Installable.apk
+          if-no-files-found: error
+          retention-days: 90
