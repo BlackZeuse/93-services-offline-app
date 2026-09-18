@@ -1,0 +1,8 @@
+<resources>
+    <color name="orange">#F28C00</color>
+    <color name="orange_dark">#D87300</color>
+    <color name="black">#111111</color>
+    <color name="gray">#F4F4F4</color>
+    <color name="line">#D7D7D7</color>
+    <color name="white">#FFFFFF</color>
+</resources>

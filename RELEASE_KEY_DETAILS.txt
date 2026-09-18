@@ -1,0 +1,8 @@
+93 SERVICES AND TECHART (PTY) LTD — RELEASE SIGNING KEY
+
+Keystore: 93_services_release.keystore
+Alias: 93servicesrelease
+Password: 93Services-Release-2026!TechArt#7
+Format: PKCS12
+
+KEEP THIS FILE AND THE KEYSTORE TOGETHER. THEY ARE REQUIRED TO BUILD FUTURE UPDATES SIGNED with the same application identity.

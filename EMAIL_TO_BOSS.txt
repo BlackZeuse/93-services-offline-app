@@ -1,0 +1,16 @@
+Subject: 93 Services Offline App
+
+Good day,
+
+Please find attached the 93 Services Offline App.
+
+The app is designed specifically for 93 Services and works without registration or an internet connection for normal quoting, invoicing, customer records, service/pricing management, document history, PDF generation and backup/restore.
+
+Installation:
+1. Download the APK attachment to the Android phone.
+2. Open the APK and tap Install.
+3. If Android asks to allow installation from this source, allow it for the email/file app once.
+4. Open 93 Services.
+
+Regards,
+TECHART (PTY) LTD

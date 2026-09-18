@@ -1,0 +1,13 @@
+93 SERVICES OFFLINE APP — INSTALLATION
+
+For Android:
+1. Save/download the APK to the phone.
+2. Tap 93_Services_Offline_App.apk.
+3. Android will show its normal installation confirmation.
+4. If prompted, enable permission to install apps from the email/file source being used.
+5. Tap Install, then Open.
+
+No registration, username, password or internet connection is required for normal operation.
+
+Important:
+Some email providers block APK attachments. When that happens, send the APK inside a ZIP file or use a file-transfer link.
