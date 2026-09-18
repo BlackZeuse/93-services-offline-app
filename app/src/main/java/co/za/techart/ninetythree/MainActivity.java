@@ -898,25 +898,23 @@ void loadDocFields(JSONObject o) {
             }
         }
 
-        String customer = o.optString("customer");
-        String phone = o.optString("phone");
-        String email = o.optString("email");
-        String address = o.optString("address");
-        String ref = o.optString("jobRef");
-        String reg = o.optString("vehicleReg");
-
         prefs.edit()
-                .putString("edit_customer", customer)
-                .putString("edit_phone", phone)
-                .putString("edit_email", email)
-                .putString("edit_address", address)
-                .putString("edit_jobRef", ref)
-                .putString("edit_vehicleReg", reg)
-                .putString("edit_discount", Double.toString(o.optDouble("discount", 0)))
-                .putBoolean("edit_applyVat", o.optBoolean("applyVat", false))
-                .putString("edit_vatRate", Double.toString(o.optDouble("rate", 15)))
-                .putString("edit_paid", Double.toString(o.optDouble("paid", 0)))
-                .putString("edit_paymentStatus", o.optString("paymentStatus", "Unpaid"))
+                .putString("edit_customer", o.optString("customer"))
+                .putString("edit_phone", o.optString("phone"))
+                .putString("edit_email", o.optString("email"))
+                .putString("edit_address", o.optString("address"))
+                .putString("edit_jobRef", o.optString("jobRef"))
+                .putString("edit_vehicleReg", o.optString("vehicleReg"))
+                .putString("edit_discount",
+                        Double.toString(o.optDouble("discount", 0)))
+                .putBoolean("edit_applyVat",
+                        o.optBoolean("applyVat", false))
+                .putString("edit_vatRate",
+                        Double.toString(o.optDouble("rate", 15)))
+                .putString("edit_paid",
+                        Double.toString(o.optDouble("paid", 0)))
+                .putString("edit_paymentStatus",
+                        o.optString("paymentStatus", "Unpaid"))
                 .apply();
 
     } catch (Exception e) {
@@ -928,18 +926,53 @@ void loadDocFields(JSONObject o) {
     }
 }
 
-        // Fields are created by showEditor; keep the values temporarily in preferences for this editing session.
-        prefs.edit()
-                .putString("edit_customer", customer).putString("edit_phone", phone)
-                .putString("edit_email", email).putString("edit_address", address)
-                .putString("edit_jobRef", ref).putString("edit_vehicleReg", reg)
-                .putString("edit_discount", Double.toString(o.optDouble("discount", 0)))
-                .putBoolean("edit_applyVat", o.optBoolean("applyVat", false))
-                .putString("edit_vatRate", Double.toString(o.optDouble("rate", 15)))
-                .putString("edit_paid", Double.toString(o.optDouble("paid", 0)))
-                .putString("edit_paymentStatus", o.optString("paymentStatus", "Unpaid"))
-                .apply();
+void applyPendingEditValues() {
+    if (customerName == null) return;
+
+    customerName.setText(prefs.getString("edit_customer", ""));
+    customerPhone.setText(prefs.getString("edit_phone", ""));
+    customerEmail.setText(prefs.getString("edit_email", ""));
+    customerAddress.setText(prefs.getString("edit_address", ""));
+    jobRef.setText(prefs.getString("edit_jobRef", ""));
+    vehicleReg.setText(prefs.getString("edit_vehicleReg", ""));
+
+    if (discountField != null)
+        discountField.setText(prefs.getString("edit_discount", ""));
+
+    if (vatCheck != null)
+        vatCheck.setChecked(prefs.getBoolean("edit_applyVat", false));
+
+    if (vatRateField != null)
+        vatRateField.setText(prefs.getString("edit_vatRate", "15"));
+
+    if (paidField != null)
+        paidField.setText(prefs.getString("edit_paid", ""));
+
+    if (paymentStatus != null) {
+        String wanted = prefs.getString("edit_paymentStatus", "Unpaid");
+
+        for (int i = 0; i < paymentStatus.getCount(); i++) {
+            if (wanted.equals(paymentStatus.getItemAtPosition(i))) {
+                paymentStatus.setSelection(i);
+                break;
+            }
+        }
     }
+
+    prefs.edit()
+            .remove("edit_customer")
+            .remove("edit_phone")
+            .remove("edit_email")
+            .remove("edit_address")
+            .remove("edit_jobRef")
+            .remove("edit_vehicleReg")
+            .remove("edit_discount")
+            .remove("edit_applyVat")
+            .remove("edit_vatRate")
+            .remove("edit_paid")
+            .remove("edit_paymentStatus")
+            .apply();
+}
 
     void applyPendingEditValues() {
         if (customerName == null) return;
