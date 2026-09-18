@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build installable 93 Services APK
     runs-on: ubuntu-latest
 
     steps:
@@ -33,19 +33,44 @@ jobs:
         with:
           gradle-version: '9.6.1'
 
-      - name: Build APK
-        run: gradle assembleDebug --stacktrace
-
-      - name: Find APK
+      - name: Create CI signing key
         run: |
-          echo "APK files:"
-          find . -type f -name "*.apk"
+          keytool -genkeypair -v \
+            -keystore 93_services_ci.keystore \
+            -storepass ci-build-password \
+            -alias 93servicesrelease \
+            -keypass ci-build-password \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=93 Services, OU=TECHART, O=93 Services, L=Thohoyandou, ST=Limpopo, C=ZA"
+          cat > keystore.properties <<'EOF'
+          storeFile=../93_services_ci.keystore
+          storePassword=ci-build-password
+          keyAlias=93servicesrelease
+          keyPassword=ci-build-password
+          EOF
 
-      - name: Upload APK
+      - name: Build signed release APK
+        run: gradle clean assembleRelease --stacktrace
+
+      - name: Verify APK package and signature
+        run: |
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          echo "APK size:"
+          ls -lh "$APK"
+          echo "APK package information:"
+          $ANDROID_HOME/build-tools/36.0.0/aapt2 dump badging "$APK" | head -20
+          echo "APK signature:"
+          $ANDROID_HOME/build-tools/36.0.0/apksigner verify --verbose "$APK"
+
+      - name: Rename APK for download
+        run: cp app/build/outputs/apk/release/app-release.apk 93-Services-Installable.apk
+
+      - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: 93-services-offline-apk
-          path: |
-            app/build/outputs/apk/**/*.apk
-            app/build/outputs/apk/*.apk
+          name: 93-services-installable-apk
+          path: 93-Services-Installable.apk
           if-no-files-found: error
