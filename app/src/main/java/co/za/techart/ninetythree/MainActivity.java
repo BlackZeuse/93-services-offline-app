@@ -882,21 +882,51 @@ public class MainActivity extends Activity {
         }
     }
 
-    void loadDocFields(JSONObject o) throws Exception {
+void loadDocFields(JSONObject o) {
+    try {
         items.clear();
+
         JSONArray ia = o.optJSONArray("items");
         if (ia != null) {
             for (int i = 0; i < ia.length(); i++) {
                 JSONObject x = ia.getJSONObject(i);
-                items.add(new Item(x.optString("description"), x.optDouble("qty", 1), x.optDouble("unitPrice", 0)));
+                items.add(new Item(
+                        x.optString("description"),
+                        x.optDouble("qty", 1),
+                        x.optDouble("unitPrice", 0)
+                ));
             }
         }
+
         String customer = o.optString("customer");
         String phone = o.optString("phone");
         String email = o.optString("email");
         String address = o.optString("address");
         String ref = o.optString("jobRef");
         String reg = o.optString("vehicleReg");
+
+        prefs.edit()
+                .putString("edit_customer", customer)
+                .putString("edit_phone", phone)
+                .putString("edit_email", email)
+                .putString("edit_address", address)
+                .putString("edit_jobRef", ref)
+                .putString("edit_vehicleReg", reg)
+                .putString("edit_discount", Double.toString(o.optDouble("discount", 0)))
+                .putBoolean("edit_applyVat", o.optBoolean("applyVat", false))
+                .putString("edit_vatRate", Double.toString(o.optDouble("rate", 15)))
+                .putString("edit_paid", Double.toString(o.optDouble("paid", 0)))
+                .putString("edit_paymentStatus", o.optString("paymentStatus", "Unpaid"))
+                .apply();
+
+    } catch (Exception e) {
+        Toast.makeText(
+                this,
+                "Could not load document: " + e.getMessage(),
+                Toast.LENGTH_LONG
+        ).show();
+    }
+}
 
         // Fields are created by showEditor; keep the values temporarily in preferences for this editing session.
         prefs.edit()
