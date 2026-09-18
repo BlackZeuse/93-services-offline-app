@@ -974,27 +974,6 @@ void applyPendingEditValues() {
             .apply();
 }
 
-    void applyPendingEditValues() {
-        if (customerName == null) return;
-        customerName.setText(prefs.getString("edit_customer", ""));
-        customerPhone.setText(prefs.getString("edit_phone", ""));
-        customerEmail.setText(prefs.getString("edit_email", ""));
-        customerAddress.setText(prefs.getString("edit_address", ""));
-        jobRef.setText(prefs.getString("edit_jobRef", ""));
-        vehicleReg.setText(prefs.getString("edit_vehicleReg", ""));
-        if (discountField != null) discountField.setText(prefs.getString("edit_discount", ""));
-        if (vatCheck != null) vatCheck.setChecked(prefs.getBoolean("edit_applyVat", false));
-        if (vatRateField != null) vatRateField.setText(prefs.getString("edit_vatRate", "15"));
-        if (paidField != null) paidField.setText(prefs.getString("edit_paid", ""));
-        if (paymentStatus != null) {
-            String wanted = prefs.getString("edit_paymentStatus", "Unpaid");
-            for (int i = 0; i < paymentStatus.getCount(); i++) if (wanted.equals(paymentStatus.getItemAtPosition(i))) { paymentStatus.setSelection(i); break; }
-        }
-        prefs.edit().remove("edit_customer").remove("edit_phone").remove("edit_email").remove("edit_address")
-                .remove("edit_jobRef").remove("edit_vehicleReg").remove("edit_discount").remove("edit_applyVat")
-                .remove("edit_vatRate").remove("edit_paid").remove("edit_paymentStatus").apply();
-    }
-
     void regenerateHistoryPdf(JSONObject o, boolean share) {
         try {
             PdfGenerator.Doc d = jsonToDoc(o);
